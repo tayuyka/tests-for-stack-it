@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
+import {waitClickable} from "../utils/wait-сlickable";
 
 export class LoginPage {
     readonly page: Page;
@@ -44,9 +45,16 @@ export class LoginPage {
         await this.submitBtn.click();
         await expect(this.confirmLogin).toBeVisible();
 
-        await this.confirmLogin.locator('[data-cy="btn-yes"]').click();
+        if (await this.confirmLogin.isVisible({ timeout: 1500 }).catch(() => false)){
+            await this.confirmLogin.locator('[data-cy="btn-yes"]').click();
 
-        await this.page.locator('[data-cy="user-menu"]').click();
+        }
+
+        const userMenu: Locator = this.page.locator('[data-cy="user-menu"]')
+        await waitClickable(userMenu);
+        await expect(userMenu).toBeVisible();
+
+        await userMenu.click();
         await expect(this.page.getByText("Администратор")).toBeVisible();
     }
 }
