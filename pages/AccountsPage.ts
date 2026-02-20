@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import {waitClickable} from "../utils/wait-сlickable";
+import {waitClickable} from "../utils/wait-clickable";
 import {waitForRecordNumberRequest} from "../utils/get-number-from-rqst";
 
 export class AccountsPage {

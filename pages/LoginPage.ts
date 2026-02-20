@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import {waitClickable} from "../utils/wait-сlickable";
+import {waitClickable} from "../utils/wait-clickable";
 
 export class LoginPage {
     readonly page: Page;
@@ -43,7 +43,6 @@ export class LoginPage {
         await this.loginInput.fill(username);
         await this.passwordInput.fill(password);
         await this.submitBtn.click();
-        await expect(this.confirmLogin).toBeVisible();
 
         if (await this.confirmLogin.isVisible({ timeout: 1500 }).catch(() => false)){
             await this.confirmLogin.locator('[data-cy="btn-yes"]').click();
