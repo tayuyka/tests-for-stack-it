@@ -3,7 +3,7 @@ import {LoginPage} from "../../pages/LoginPage";
 import {AccountsPage} from "../../pages/AccountsPage";
 
 
-test.describe('District CRUD @regression', () => {
+test.describe('edit district @regression', () => {
     let recordNumber: number;
     let districtName: string;
 
@@ -12,7 +12,7 @@ test.describe('District CRUD @regression', () => {
         const accountPage = new AccountsPage(page);
 
         await loginPage.open();
-        await loginPage.waitForOpenForm();
+        await loginPage.waitForOpenForm();``
         await loginPage.login(process.env.STACK_LOGIN!, process.env.STACK_PASSWORD!);
 
         districtName = `new-district-${Date.now()}`;
@@ -22,11 +22,6 @@ test.describe('District CRUD @regression', () => {
         await accountPage.checkNoteInTable(recordNumber);
     });
 
-    test.afterEach(async ({ page }) => {
-        // const accountPage = new AccountsPage(page);
-        // await accountPage.open();
-        // await accountPage.deleteDistrict(districtName);
-    });
 
     test('edit district ', async ({ page }) => {
         const accountPage = new AccountsPage(page);
