@@ -6,24 +6,28 @@ export class AccountsPage {
     readonly page: Page;
     readonly addBtn: Locator;
     readonly stackMenu: Locator;
+    readonly headerToolbar: Locator;
     readonly stackDialog: Locator;
     readonly addForm: Locator;
     readonly saveBtn: Locator;
     readonly cancelBtn: Locator;
     readonly nameInput: Locator;
     readonly listNumberInput: Locator;
+    readonly deleteDialog: Locator;
 
 
     constructor(page: Page) {
         this.page = page;
         this.addBtn = this.page.locator('[data-cy="btn-add"]');
         this.stackMenu = this.page.locator('[data-cy="stack-menu-list"]');
+        this.headerToolbar = this.page.locator('[data-cy="stack-table-toolbar"]');
         this.stackDialog = this.page.locator('[data-cy="stack-dialog"]');
         this.addForm = this.stackDialog.locator('[data-cy="form"]');
         this.saveBtn = this.stackDialog.locator('[data-cy="btn-save"]');
         this.cancelBtn = this.stackDialog.locator('[data-cy="btn-cancel"]');
-        this.nameInput = this.addForm.locator('[data-cy="stack-input"]').first();
+        this.nameInput = this.addForm.locator('[data-test-id="Название района"]');
         this.listNumberInput = this.addForm.locator('[data-test-id="Номер в списке"]');
+        this.deleteDialog = this.page.locator('[data-test-id="stack-yes-no"]');
     }
 
     async open() {
@@ -64,7 +68,6 @@ export class AccountsPage {
 
         await expect(row).toHaveCount(1);
         await expect(row).toBeVisible();
-
     }
 
 
@@ -100,5 +103,32 @@ export class AccountsPage {
         await expect(updatedRow.locator('[data-field="название"]')).toHaveText(newName);
     }
 
+    async deleteDistrict(recordNumber: number){
+        await this.checkNoteInTable(recordNumber);
+        const row: Locator = this.foundRowByRecordNumber(recordNumber);
+        await expect(row).toHaveCount(1);
 
+
+
+        const cbInput = row.locator('input[data-cy="checkbox"]');
+        await row.hover();
+
+        await expect(cbInput).toBeVisible({ timeout: 5000 });
+
+        const cbWrapper = cbInput.locator('..'); // один уровень вверх
+        await cbWrapper.click();
+
+
+        const deleteBth = this.headerToolbar.locator('[data-cy="btn-delete"]');
+        await expect(deleteBth).toBeVisible();
+
+        await deleteBth.click();
+
+        await expect(this.deleteDialog).toBeVisible();
+        await this.deleteDialog.locator('[data-cy="btn-yes"]').click();
+
+        await expect(this.deleteDialog).toBeHidden();
+
+        await expect(row).toHaveCount(0);
+    }
 }
