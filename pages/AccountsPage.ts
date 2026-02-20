@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 import {waitClickable} from "../utils/wait-сlickable";
+import {waitForRecordNumberRequest} from "../utils/get-number-from-rqst";
 
 export class AccountsPage {
     readonly page: Page;
@@ -42,13 +43,18 @@ export class AccountsPage {
         await expect(this.stackDialog.getByText(' Район (создание) ')).toBeVisible();
     }
 
-    async addNewDistrict(districtName: string) {
+    async addNewDistrict(districtName: string): Promise<number> {
         await this.openForOpenDistrictForm();
 
         await this.nameInput.fill(districtName);
 
-        await this.saveBtn.click();
+        const [recordNumber] = await Promise.all([
+            waitForRecordNumberRequest(this.page),
+            this.saveBtn.click(),
+        ]);
         await expect(this.stackDialog).toBeHidden();
+
+        return recordNumber
     }
 
     async checkNoteInTable(name: string) {
