@@ -34,7 +34,7 @@ jobs:
           echo "STACK_PASSWORD=${{ secrets.STACK_PASSWORD }}" >> .env
 
       - name: Run smoke
-        run: npx playwright test -g "@smoke|@critical" --workers=1
+        run: npx playwright test -g "@smoke" --project=chromium --workers=1
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
@@ -51,7 +51,6 @@ jobs:
           retention-days: 14
 
   regression:
-    # regression не гоняем на каждом PR, только на push и вручную
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60

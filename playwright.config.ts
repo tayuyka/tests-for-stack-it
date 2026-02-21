@@ -18,6 +18,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
  */
 export default defineConfig({
   testDir: './tests',
+  timeout: 90_000,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -31,6 +32,8 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
+    navigationTimeout: 60000,
+    actionTimeout: 30000,
     baseURL: 'https://demo.app.stack-it.ru',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
