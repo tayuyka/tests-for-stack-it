@@ -39,14 +39,14 @@ jobs:
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: smoke-report
+          name: smoke-report.zip
           path: playwright-report/
           retention-days: 14
 
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: smoke-test-results
+          name: smoke-test-results.zip
           path: test-results/
           retention-days: 14
 
@@ -82,13 +82,13 @@ jobs:
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: regression-report
+          name: regression-report.zip
           path: playwright-report/
           retention-days: 14
 
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: regression-test-results
+          name: regression-test-results.zip
           path: test-results/
           retention-days: 14
