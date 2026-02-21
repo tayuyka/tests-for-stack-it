@@ -20,7 +20,7 @@ export class AccountsPage {
     }
 
     async open() {
-        await this.page.goto('/fl/accounts');
+        await this.page.goto('/fl/accounts', { waitUntil: 'domcontentloaded' });
         await expect(this.page.locator('[data-cy="stack-table-toolbar"]').getByText(/адреса проживающих/i)).toBeVisible();
     }
 
