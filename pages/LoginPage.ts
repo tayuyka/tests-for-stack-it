@@ -31,8 +31,7 @@ export class LoginPage {
     }
 
     async open() {
-        await this.page.goto('/fl/');
-    }
+        await this.page.goto('/fl/', { waitUntil: 'domcontentloaded' });    }
 
     async waitForOpenForm() {
         await expect(this.dialog).toBeVisible();
