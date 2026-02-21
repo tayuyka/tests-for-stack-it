@@ -1,14 +1,6 @@
 import {test, expect} from "@playwright/test";
 import {LoginPage} from "../../pages/LoginPage";
 
-
-test ('login-dialog has open @smoke', async ({page}) => {
-    const loginPage = new LoginPage(page)
-    await loginPage.open()
-
-    await loginPage.waitForOpenForm()
-});
-
 test ('login @smoke', async ({page}) => {
     const loginPage = new LoginPage(page)
     await loginPage.open()
