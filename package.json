@@ -6,6 +6,8 @@
   "scripts": {
     "build": "tsc",
     "test": "playwright test",
+    "test:smoke": "playwright test -g \"@smoke|@critical\" --workers=1",
+    "test:regression": "playwright test -g \"@regression\" --workers=1",
     "test:ui": "playwright test --ui",
     "report:pw": "playwright show-report",
     "report:allure": "allure generate ./allure-results -o ./allure-report --clean",
