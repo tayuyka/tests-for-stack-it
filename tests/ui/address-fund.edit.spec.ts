@@ -11,15 +11,19 @@ test.describe('edit district @regression', () => {
         const loginPage = new LoginPage(page);
         const accountPage = new AccountsPage(page);
 
-        await loginPage.open();
-        await loginPage.waitForOpenForm();
-        await loginPage.login(process.env.STACK_LOGIN!, process.env.STACK_PASSWORD!);
+        await test.step('Login to application', async () => {
+            await loginPage.open();
+            await loginPage.waitForOpenForm();
+            await loginPage.login(process.env.STACK_LOGIN!, process.env.STACK_PASSWORD!);
+        });
 
         districtName = `new-district-${Date.now()}`;
 
-        await accountPage.open();
-        recordNumber = await accountPage.addNewDistrict(districtName);
-        await accountPage.checkNoteInTable(recordNumber, districtName);
+        await test.step(`Create test district: "${districtName}"`, async () => {
+            await accountPage.open();
+            recordNumber = await accountPage.addNewDistrict(districtName);
+            await accountPage.checkNoteInTable(recordNumber, districtName);
+        });
     });
 
     test.afterEach(async ({ page }) => {
@@ -34,24 +38,30 @@ test.describe('edit district @regression', () => {
 
     test('edit district @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
-
         const newName = `${districtName}-edited`;
-        await accountPage.editDistrict(recordNumber!, newName);
+
+        await test.step(`Edit district "${districtName}" to "${newName}"`, async () => {
+            await accountPage.editDistrict(recordNumber!, newName);
+        });
     });
 
     test('check original data after cancelling edit @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
-        const nameInputLocator = await accountPage.openEditDistrictForm(recordNumber!);
+        await test.step('Open edit form for district', async () => {
+            const nameInputLocator = await accountPage.openEditDistrictForm(recordNumber!);
+            const currentNameInForm = await nameInputLocator.inputValue();
+            expect(currentNameInForm).toBe(districtName);
+        });
 
-        const currentNameInForm = await nameInputLocator.inputValue();
-        expect(currentNameInForm).toBe(districtName);
+        await test.step('Cancel edit without changes', async () => {
+            await accountPage.stackDialog.cancelForm();
+            await accountPage.stackDialog.expectHidden();
+        });
 
-        await accountPage.stackDialog.cancelForm();
-
-        await accountPage.stackDialog.expectHidden();
-
-        await accountPage.checkNoteInTable(recordNumber!, districtName);
+        await test.step('Verify district data remains unchanged', async () => {
+            await accountPage.checkNoteInTable(recordNumber!, districtName);
+        });
     });
 
     test('save button should be disabled if no changes are made @regression', async ({ page }) => {
