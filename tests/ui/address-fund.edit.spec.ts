@@ -19,14 +19,43 @@ test.describe('edit district @regression', () => {
 
         await accountPage.open();
         recordNumber = await accountPage.addNewDistrict(districtName);
-        await accountPage.checkNoteInTable(recordNumber);
+        await accountPage.checkNoteInTable(recordNumber, districtName);
     });
 
-
-    test('edit district ', async ({ page }) => {
+    test('edit district @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
         const newName = `${districtName}-edited`;
         await accountPage.editDistrict(recordNumber, newName);
+    });
+
+    test('check original data after cancelling edit @regression', async ({ page }) => {
+        const accountPage = new AccountsPage(page);
+
+        const nameInputLocator = await accountPage.openEditDistrictForm(recordNumber);
+
+        const currentNameInForm = await nameInputLocator.inputValue();
+        expect(currentNameInForm).toBe(districtName);
+
+        await accountPage.stackDialog.cancelForm();
+
+        await accountPage.stackDialog.expectHidden();
+
+        await accountPage.checkNoteInTable(recordNumber, districtName);
+    });
+
+    test('save button should be disabled if no changes are made @regression', async ({ page }) => {
+        const accountPage = new AccountsPage(page);
+
+        await accountPage.openEditDistrictForm(recordNumber);
+
+        await accountPage.stackDialog.expectSaveButtonState('disabled');
+
+        await accountPage.stackDialog.simulateTabPress(2);
+
+        await accountPage.stackDialog.expectSaveButtonState('disabled');
+
+        await accountPage.stackDialog.cancelForm();
+        await accountPage.stackDialog.expectHidden();
     });
 });
