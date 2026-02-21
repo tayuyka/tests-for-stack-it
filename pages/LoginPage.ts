@@ -44,10 +44,11 @@ export class LoginPage {
         await this.passwordInput.fill(password);
         await this.submitBtn.click();
 
-        if (await this.confirmLogin.isVisible({ timeout: 1500 }).catch(() => false)){
-            await this.confirmLogin.locator('[data-cy="btn-yes"]').click();
-
-        }
+        const yesBtn = this.confirmLogin.locator('[data-cy="btn-yes"]');
+        try {
+            await yesBtn.waitFor({ state: 'visible', timeout: 15000 });
+            await yesBtn.click();
+        } catch {}
 
         const userMenu: Locator = this.page.locator('[data-cy="user-menu"]')
         await waitClickable(userMenu);
