@@ -34,7 +34,7 @@ export class AccountsPage {
 
         await expect(districtItem).toBeVisible();
         await districtItem.click();
-        await this.stackDialog.expectVisible('Район (создание)');
+        await this.stackDialog.expectVisible(/Район\s*\(создание\)/i);
     }
 
     async addNewDistrict(districtName: string): Promise<number> {

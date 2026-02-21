@@ -13,7 +13,7 @@ export class LoginPage {
         this.page = page;
 
         this.dialog = page.locator('[role="dialog"][aria-modal="true"]').filter({
-            has: page.getByText('Вход', { exact: true }),
+            has: page.getByText(/Вход/i),
         });
 
         this.loginInput = this.dialog
@@ -55,6 +55,6 @@ export class LoginPage {
         await expect(userMenu).toBeVisible();
 
         await userMenu.click();
-        await expect(this.page.getByText("Администратор")).toBeVisible();
+        await expect(this.page.getByText(/Администратор/i)).toBeVisible();
     }
 }
