@@ -2,7 +2,7 @@ import {test, expect} from "@playwright/test";
 import {LoginPage} from "../../pages/LoginPage";
 import {AccountsPage} from "../../pages/AccountsPage";
 
-test ('District CRUD @regression', async ({page}) => {
+test ('District CRUD @e2e @regression @critical', async ({page}) => {
     let recordNumber: number;
     const districtName: string = `new-district-${Date.now()}`;
 
