@@ -1,10 +1,15 @@
 # =========================
+# IDE / Editors
+# =========================
+.idea/
+.vscode/
+*.iml
+
+# =========================
 # Dependencies
 # =========================
 node_modules/
-/tmp
-/out-tsc
-/.pnp
+.pnp
 .pnp.js
 
 # =========================
@@ -17,11 +22,12 @@ pnpm-debug.log*
 *.log
 
 # =========================
-# Build outputs
+# Build outputs / coverage
 # =========================
 dist/
 build/
 out/
+out-tsc/
 coverage/
 .nyc_output/
 *.tsbuildinfo
@@ -39,24 +45,6 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
-trace.zip
-*.zip
-
-# =========================
-# IDE / Editors
-# =========================
-.idea/
-.vscode/
-*.iml
-
-# =========================
-# OS junk
-# =========================
-.DS_Store
-Thumbs.db
-
-# Playwright
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+playwright/.cache/
+playwright/.auth/
+tr

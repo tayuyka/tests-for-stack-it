@@ -1,0 +1,116 @@
+name: Playwright CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Which suite to run"
+        type: choice
+        required: true
+        default: smoke
+        options:
+          - smoke
+          - regression
+          - critical
+          - all
+          - custom
+      grep:
+        description: "Custom grep expression (used only when suite=custom)"
+        type: string
+        required: false
+        default: "@smoke"
+      project:
+        description: "Browser project"
+        type: choice
+        required: true
+        default: chromium
+        options:
+          - chromium
+          - firefox
+          - webkit
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+
+      - name: Create .env from secrets
+        run: |
+          echo "STACK_LOGIN=${{ secrets.STACK_LOGIN }}" >> .env
+          echo "STACK_PASSWORD=${{ secrets.STACK_PASSWORD }}" >> .env
+
+      - name: Decide grep and project
+        id: vars
+        shell: bash
+        run: |
+          EVENT="${{ github.event_name }}"
+          REF="${{ github.ref_name }}"
+
+          # Defaults for each trigger:
+          # - push to dev => smoke
+          # - PR to main  => regression
+          # - workflow_dispatch => use inputs
+          if [[ "$EVENT" == "push" && "$REF" == "dev" ]]; then
+            SUITE="smoke"
+            PROJECT="chromium"
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            SUITE="regression"
+            PROJECT="chromium"
+          else
+            SUITE="${{ inputs.suite }}"
+            PROJECT="${{ inputs.project }}"
+          fi
+
+          case "$SUITE" in
+            smoke)      GREP="@smoke" ;;
+            regression) GREP="@regression" ;;
+            critical)   GREP="@critical" ;;
+            all)        GREP=".*" ;;
+            custom)     GREP="${{ inputs.grep }}" ;;
+            *)          GREP="@smoke" ;;
+          esac
+
+          echo "suite=$SUITE" >> $GITHUB_OUTPUT
+          echo "grep=$GREP" >> $GITHUB_OUTPUT
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+
+      - name: Run Playwright
+        run: npx playwright test -g "${{ steps.vars.outputs.grep }}" --project=${{ steps.vars.outputs.project }} --workers=1
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: playwright-report-${{ steps.vars.outputs.suite }}-${{ steps.vars.outputs.project }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (screenshots, etc.)
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: test-results-${{ steps.vars.outputs.suite }}-${{ steps.vars.outputs.project }}
+          path: test-results/
+          retention-days: 14
