@@ -46,7 +46,7 @@ export class LoginPage {
 
         const yesBtn = this.confirmLogin.locator('[data-cy="btn-yes"]');
         try {
-            await yesBtn.waitFor({ state: 'visible', timeout: 15000 });
+            await yesBtn.waitFor({ state: 'visible', timeout: 5000 });
             await yesBtn.click();
         } catch {}
 
