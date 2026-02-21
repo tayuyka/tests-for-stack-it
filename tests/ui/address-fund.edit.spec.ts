@@ -4,7 +4,7 @@ import {AccountsPage} from "../../pages/AccountsPage";
 
 
 test.describe('edit district @regression', () => {
-    let recordNumber: number;
+    let recordNumber: number | null = null;
     let districtName: string;
 
     test.beforeEach(async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe('edit district @regression', () => {
         const accountPage = new AccountsPage(page);
 
         await loginPage.open();
-        await loginPage.waitForOpenForm();``
+        await loginPage.waitForOpenForm();
         await loginPage.login(process.env.STACK_LOGIN!, process.env.STACK_PASSWORD!);
 
         districtName = `new-district-${Date.now()}`;
@@ -22,17 +22,27 @@ test.describe('edit district @regression', () => {
         await accountPage.checkNoteInTable(recordNumber, districtName);
     });
 
+    test.afterEach(async ({ page }) => {
+        if(recordNumber) {
+            const accountPage = new AccountsPage(page);
+
+            await accountPage.open();
+            await accountPage.deleteDistrict(recordNumber);
+            recordNumber = null;
+        }
+    });
+
     test('edit district @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
         const newName = `${districtName}-edited`;
-        await accountPage.editDistrict(recordNumber, newName);
+        await accountPage.editDistrict(recordNumber!, newName);
     });
 
     test('check original data after cancelling edit @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
-        const nameInputLocator = await accountPage.openEditDistrictForm(recordNumber);
+        const nameInputLocator = await accountPage.openEditDistrictForm(recordNumber!);
 
         const currentNameInForm = await nameInputLocator.inputValue();
         expect(currentNameInForm).toBe(districtName);
@@ -41,13 +51,13 @@ test.describe('edit district @regression', () => {
 
         await accountPage.stackDialog.expectHidden();
 
-        await accountPage.checkNoteInTable(recordNumber, districtName);
+        await accountPage.checkNoteInTable(recordNumber!, districtName);
     });
 
     test('save button should be disabled if no changes are made @regression', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
-        await accountPage.openEditDistrictForm(recordNumber);
+        await accountPage.openEditDistrictForm(recordNumber!);
 
         await accountPage.stackDialog.expectSaveButtonState('disabled');
 

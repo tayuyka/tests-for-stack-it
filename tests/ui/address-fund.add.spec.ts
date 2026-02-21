@@ -4,6 +4,8 @@ import {AccountsPage} from "../../pages/AccountsPage";
 
 
 test.describe('add district @regression', () => {
+    let recordNumber: number | null = null;
+
     test.beforeEach(async ({page}) => {
         const loginPage = new LoginPage(page);
 
@@ -13,12 +15,22 @@ test.describe('add district @regression', () => {
 
     });
 
+    test.afterEach(async ({ page }) => {
+        if(recordNumber) {
+            const accountPage = new AccountsPage(page);
+
+            await accountPage.open();
+            await accountPage.deleteDistrict(recordNumber);
+            recordNumber = null;
+        }
+    });
+
     test ('add district @regression', async ({page}) => {
         const accountPage = new AccountsPage(page);
         const districtName: string = `new-district-${Date.now()}`;
 
         await accountPage.open();
-        const recordNumber: number = await accountPage.addNewDistrict(districtName);
+        recordNumber = await accountPage.addNewDistrict(districtName);
         await accountPage.checkNoteInTable(recordNumber, districtName);
     });
 
