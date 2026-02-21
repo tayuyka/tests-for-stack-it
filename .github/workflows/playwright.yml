@@ -1,18 +1,46 @@
 name: Playwright CI
 
 on:
-  pull_request:
-    branches: [ dev, main ]
   push:
-    branches: [ dev, main ]
+    branches: [ dev ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      suite:
+        description: "Which suite to run"
+        type: choice
+        required: true
+        default: smoke
+        options:
+          - smoke
+          - regression
+          - critical
+          - all
+          - custom
+      grep:
+        description: "Custom grep expression (used only when suite=custom)"
+        type: string
+        required: false
+        default: "@smoke"
+      project:
+        description: "Browser project"
+        type: choice
+        required: true
+        default: chromium
+        options:
+          - chromium
+          - firefox
+          - webkit
 
 jobs:
-  smoke:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
@@ -33,62 +61,56 @@ jobs:
           echo "STACK_LOGIN=${{ secrets.STACK_LOGIN }}" >> .env
           echo "STACK_PASSWORD=${{ secrets.STACK_PASSWORD }}" >> .env
 
-      - name: Run smoke
-        run: npx playwright test -g "@smoke" --project=chromium --workers=1
-
-      - uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: smoke-report.zip
-          path: playwright-report/
-          retention-days: 14
-
-      - uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: smoke-test-results.zip
-          path: test-results/
-          retention-days: 14
-
-  regression:
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: npm
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - run: npm ci
-      - run: npx playwright install --with-deps
-
-      - name: Create .env from secrets
+      - name: Decide grep and project
+        id: vars
+        shell: bash
         run: |
-          echo "STACK_LOGIN=${{ secrets.STACK_LOGIN }}" >> .env
-          echo "STACK_PASSWORD=${{ secrets.STACK_PASSWORD }}" >> .env
+          EVENT="${{ github.event_name }}"
+          REF="${{ github.ref_name }}"
 
-      - name: Run regression
-        run: npx playwright test -g "@regression" --project=chromium --workers=1
+          # Defaults for each trigger:
+          # - push to dev => smoke
+          # - PR to main  => regression
+          # - workflow_dispatch => use inputs
+          if [[ "$EVENT" == "push" && "$REF" == "dev" ]]; then
+            SUITE="smoke"
+            PROJECT="chromium"
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            SUITE="regression"
+            PROJECT="chromium"
+          else
+            SUITE="${{ inputs.suite }}"
+            PROJECT="${{ inputs.project }}"
+          fi
 
-      - uses: actions/upload-artifact@v5
+          case "$SUITE" in
+            smoke)      GREP="@smoke" ;;
+            regression) GREP="@regression" ;;
+            critical)   GREP="@critical" ;;
+            all)        GREP=".*" ;;
+            custom)     GREP="${{ inputs.grep }}" ;;
+            *)          GREP="@smoke" ;;
+          esac
+
+          echo "suite=$SUITE" >> $GITHUB_OUTPUT
+          echo "grep=$GREP" >> $GITHUB_OUTPUT
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+
+      - name: Run Playwright
+        run: npx playwright test -g "${{ steps.vars.outputs.grep }}" --project=${{ steps.vars.outputs.project }} --workers=1
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: regression-report.zip
+          name: playwright-report-${{ steps.vars.outputs.suite }}-${{ steps.vars.outputs.project }}
           path: playwright-report/
           retention-days: 14
 
-      - uses: actions/upload-artifact@v5
+      - name: Upload test results (screenshots, etc.)
+        uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: regression-test-results.zip
+          name: test-results-${{ steps.vars.outputs.suite }}-${{ steps.vars.outputs.project }}
           path: test-results/
           retention-days: 14
