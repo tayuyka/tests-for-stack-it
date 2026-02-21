@@ -36,8 +36,8 @@ export default defineConfig({
     actionTimeout: 30000,
     baseURL: 'https://demo.app.stack-it.ru',
     screenshot: 'only-on-failure',
-    trace: 'on-first-retry',
-    video: 'retain-on-failure',
+    video: process.env.CI ? 'off' : 'retain-on-failure',
+    trace: process.env.CI ? 'off' : 'on-first-retry',
   },
 
   /* Configure projects for major browsers */

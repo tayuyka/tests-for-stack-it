@@ -37,14 +37,14 @@ jobs:
         run: npx playwright test -g "@smoke" --project=chromium --workers=1
 
       - uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: smoke-report
           path: playwright-report/
           retention-days: 14
 
       - uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: smoke-test-results
           path: test-results/
@@ -77,17 +77,17 @@ jobs:
           echo "STACK_PASSWORD=${{ secrets.STACK_PASSWORD }}" >> .env
 
       - name: Run regression
-        run: npx playwright test -g "@regression" --workers=1
+        run: npx playwright test -g "@regression" --project=chromium --workers=1
 
       - uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: regression-report
           path: playwright-report/
           retention-days: 14
 
       - uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: regression-test-results
           path: test-results/
