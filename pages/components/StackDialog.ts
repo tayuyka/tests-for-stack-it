@@ -20,8 +20,19 @@ export class StackDialog {
         this.listNumberInput = this.addForm.locator('[data-test-id="Номер в списке"]');
     }
 
-    async fillDistrictForm(districtName: string) {
+    async fillDistrictForm(districtName: string, listNumber?: string) {
         await this.nameInput.fill(districtName);
+        if (listNumber !== undefined) {
+            await this.listNumberInput.fill(listNumber);
+        }
+    }
+
+    async fillListNumber(listNumber: string) {
+        await this.listNumberInput.fill(listNumber);
+    }
+
+    async getListNumberValue(): Promise<string> {
+        return await this.listNumberInput.inputValue();
     }
 
     async saveForm(): Promise<number> {
