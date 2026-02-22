@@ -28,7 +28,7 @@ test.describe('add district @regression', () => {
         }
     });
 
-    test ('add district @regression', async ({page}) => {
+    test ('add district', async ({page}) => {
         const accountPage = new AccountsPage(page);
         const districtName: string = `new-district-${Date.now()}`;
 
@@ -45,7 +45,7 @@ test.describe('add district @regression', () => {
         });
     });
 
-    test ('add nameless district @regression @negative', async ({page}) => {
+    test ('add nameless district @negative', async ({page}) => {
         const accountPage = new AccountsPage(page);
 
         await test.step('Open accounts page', async () => {

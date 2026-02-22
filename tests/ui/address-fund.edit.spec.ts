@@ -36,7 +36,7 @@ test.describe('edit district @regression', () => {
         }
     });
 
-    test('edit district @regression', async ({ page }) => {
+    test('edit district', async ({ page }) => {
         const accountPage = new AccountsPage(page);
         const newName = `${districtName}-edited`;
 
@@ -45,7 +45,7 @@ test.describe('edit district @regression', () => {
         });
     });
 
-    test('check original data after cancelling edit @regression', async ({ page }) => {
+    test('check original data after cancelling edit', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
         await test.step('Open edit form for district', async () => {
@@ -64,7 +64,7 @@ test.describe('edit district @regression', () => {
         });
     });
 
-    test('save button should be disabled if no changes are made @regression', async ({ page }) => {
+    test('save button should be disabled if no changes are made', async ({ page }) => {
         const accountPage = new AccountsPage(page);
 
         await accountPage.openEditDistrictForm(recordNumber!);
