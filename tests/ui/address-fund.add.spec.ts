@@ -65,4 +65,56 @@ test.describe('add district @regression', () => {
             await accountPage.stackDialog.expectVisible(/поле не может быть пустым/i);
         });
     });
+
+    test('add district with empty list number @negative', async ({page}) => {
+        const accountPage = new AccountsPage(page);
+        const districtName: string = `district-${Date.now()}`;
+
+        await test.step('Open accounts page', async () => {
+            await accountPage.open();
+        });
+
+        await test.step('Open district form', async () => {
+            await accountPage.openDistrictForm();
+        });
+
+        await test.step('Fill name and clear list number', async () => {
+            await accountPage.stackDialog.fillDistrictForm(districtName);
+            await accountPage.stackDialog.listNumberInput.clear();
+        });
+
+        await test.step('Verify validation error for empty list number', async () => {
+            await accountPage.stackDialog.expectVisible(/поле не может быть пустым/i);
+        });
+    });
+
+    test('list number field should not accept non-numeric characters @negative', async ({page}) => {
+        const accountPage = new AccountsPage(page);
+
+        await test.step('Open accounts page', async () => {
+            await accountPage.open();
+        });
+
+        await test.step('Open district form', async () => {
+            await accountPage.openDistrictForm();
+        });
+
+        await test.step('Try to input letters in list number field', async () => {
+            await accountPage.stackDialog.listNumberInput.fill('abc');
+            const value = await accountPage.stackDialog.getListNumberValue();
+            expect(value).toBe('');
+        });
+
+        await test.step('Try to input special characters in list number field', async () => {
+            await accountPage.stackDialog.listNumberInput.fill('!@#$%');
+            const value = await accountPage.stackDialog.getListNumberValue();
+            expect(value).toBe('');
+        });
+
+        await test.step('Try to input mixed characters in list number field', async () => {
+            await accountPage.stackDialog.listNumberInput.fill('123abc456');
+            const value = await accountPage.stackDialog.getListNumberValue();
+            expect(value).toMatch(/^\d*$/);
+        });
+    });
 });
