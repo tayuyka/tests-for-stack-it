@@ -34,11 +34,18 @@ export class AccountsPage {
     }
 
     async getCurrentPageNumber(): Promise<number> {
+        if (await this.currentPageInput.count() === 0) return 1;
+        await expect(this.currentPageInput).toBeVisible({ timeout: 15000 });
+
         const value = await this.currentPageInput.inputValue();
-        return parseInt(value, 10);
+        const n = parseInt(value, 10);
+        return Number.isFinite(n) ? n : 1;
     }
 
     async getTotalPagesNumber(): Promise<number> {
+        if (await this.pagination.count() === 0) return 1;
+        await expect(this.pagination).toBeVisible({ timeout: 15000 });
+
         const text = (await this.pagination.textContent()) ?? '';
         const m = text.match(/из\s*(\d+)/i);
         return m ? parseInt(m[1], 10) : 1;
