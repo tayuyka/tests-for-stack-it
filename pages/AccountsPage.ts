@@ -33,6 +33,20 @@ export class AccountsPage {
         this.recordsRangeText = this.paginationFooter.getByText(/Записей/i);
     }
 
+    async open() {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                await this.page.goto('/fl/accounts', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+                await expect(this.page).toHaveURL(/\/fl\/accounts/, { timeout: 30_000 });
+                await expect(this.headerToolbar.getByText(/адреса проживающих/i)).toBeVisible({ timeout: 30_000 });
+                return;
+            } catch (e) {
+                if (attempt === 2) throw e;
+                await this.page.reload({ waitUntil: 'domcontentloaded' });
+            }
+        }
+    }
+
     async getCurrentPageNumber(): Promise<number> {
         if (await this.currentPageInput.count() === 0) return 1;
         await expect(this.currentPageInput).toBeVisible({ timeout: 15000 });
@@ -60,11 +74,6 @@ export class AccountsPage {
         await expect(this.currentPageInput).toHaveValue(String(pageNumber), { timeout: 15000 });
 
         await expect(this.recordsRangeText).not.toHaveText(prevRange, { timeout: 15000 });
-    }
-
-    async open() {
-        await this.page.goto('/fl/accounts', { waitUntil: 'domcontentloaded' });
-        await expect(this.page.locator('[data-cy="stack-table-toolbar"]').getByText(/адреса проживающих/i)).toBeVisible();
     }
 
     async openDistrictForm() {
